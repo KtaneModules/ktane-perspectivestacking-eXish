@@ -388,9 +388,9 @@ public class PerspectiveStackingScript : MonoBehaviour {
         for (int y = 0; y < 5; y++)
         {
             for (int z = 4; z >= 0; z--)
-                Debug.Log(ConvertColor(gridMats[cube[z][y][0]].name) + ConvertColor(gridMats[cube[z][y][1]].name) + ConvertColor(gridMats[cube[z][y][2]].name) + ConvertColor(gridMats[cube[z][y][3]].name) + ConvertColor(gridMats[cube[z][y][4]].name) + "\n");
+                Debug.LogFormat("[Perspective Stacking #{0}] {1} {2} {3} {4} {5}", moduleId, ConvertColor(gridMats[cube[z][y][0]].name), ConvertColor(gridMats[cube[z][y][1]].name), ConvertColor(gridMats[cube[z][y][2]].name), ConvertColor(gridMats[cube[z][y][3]].name), ConvertColor(gridMats[cube[z][y][4]].name));
             if (y != 4)
-                Debug.Log("\n");
+                Debug.LogFormat("[Perspective Stacking #{0}]", moduleId);
         }
     }
 
