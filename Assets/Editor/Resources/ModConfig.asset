@@ -23,11 +23,11 @@ MonoBehaviour:
     PDF: https://ktane.timwi.de/PDF/Perspective%20Stacking.pdf
 
 
-    Perspective Stacking (perspectiveStackingModule) v1.0.1
+    Perspective Stacking (perspectiveStackingModule) v1.0.2
 
     Module and Concept by eXish
 
     Twitch Plays supported'
-  version: 1.0.1
+  version: 1.0.2
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 24e6ad4e54bc37b438b340fdf81092e5, type: 3}

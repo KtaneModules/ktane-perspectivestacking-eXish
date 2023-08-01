@@ -10,6 +10,7 @@ public class PerspectiveStackingScript : MonoBehaviour {
 
     public KMAudio audio;
     public KMBombInfo bomb;
+    public KMColorblindMode colorblind;
     public KMSelectable[] buttons;
     public MeshRenderer[] gridRends;
     public Material[] gridMats;
@@ -29,6 +30,7 @@ public class PerspectiveStackingScript : MonoBehaviour {
     private int rot2;
     private int selectedCol = -1;
     private bool lightsOn;
+    private bool cbEnabled;
 
     static int moduleIdCounter = 1;
     int moduleId;
@@ -42,6 +44,8 @@ public class PerspectiveStackingScript : MonoBehaviour {
             KMSelectable pressed = obj;
             pressed.OnInteract += delegate () { PressButton(pressed); return false; };
         }
+        if (colorblind.ColorblindModeActive)
+            cbEnabled = true;
         GetComponent<KMBombModule>().OnActivate += LightsOn;
     }
 
@@ -66,7 +70,7 @@ public class PerspectiveStackingScript : MonoBehaviour {
                 "Organization",
                 "Perspective Stacking",
                 "Purgatory",
-                "Queen’s War",
+                "Queen's War",
                 "Simon's Stages",
                 "Souvenir",
                 "Tallordered Keys",
@@ -75,7 +79,7 @@ public class PerspectiveStackingScript : MonoBehaviour {
                 "The Troll",
                 "Turn The Key",
                 "Übermodule",
-                "Ültimate Custom Night",
+                "Ultimate Custom Night",
                 "The Very Annoying Button"
             });
         if (!Application.isEditor)
@@ -141,6 +145,13 @@ public class PerspectiveStackingScript : MonoBehaviour {
             {
                 audio.PlaySoundAtTransform("press" + UnityEngine.Random.Range(1, 6), transform);
                 gridRends[index].material = gridMats[selectedCol];
+                if (cbEnabled)
+                {
+                    if (selectedCol == 0)
+                        buttons[index].gameObject.GetComponentInChildren<TextMesh>().text = "";
+                    else
+                        buttons[index].gameObject.GetComponentInChildren<TextMesh>().text = gridMats[selectedCol].name[0].ToString().ToUpper();
+                }
                 input[index / 5][index % 5] = selectedCol;
             }
             else if (index >= 25)
@@ -244,6 +255,8 @@ public class PerspectiveStackingScript : MonoBehaviour {
                 if (stageList[stage].x == j && stageList[stage].y == i)
                 {
                     gridRends[i * 5 + j].material = gridMats[stageList[stage].color + 1];
+                    if (cbEnabled)
+                        buttons[i * 5 + j].gameObject.GetComponentInChildren<TextMesh>().text = gridMats[stageList[stage].color + 1].name[0].ToString().ToUpper();
                     i = 5;
                     break;
                 }
@@ -685,7 +698,11 @@ public class PerspectiveStackingScript : MonoBehaviour {
     void ClearGrid()
     {
         for (int i = 0; i < gridRends.Length; i++)
+        {
             gridRends[i].material = gridMats[0];
+            if (cbEnabled)
+                buttons[i].gameObject.GetComponentInChildren<TextMesh>().text = "";
+        }
     }
 
     void ClearSelectionColor()
@@ -697,7 +714,11 @@ public class PerspectiveStackingScript : MonoBehaviour {
     void PassGrid()
     {
         for (int i = 0; i < gridRends.Length; i++)
+        {
             gridRends[i].material = gridMats[2];
+            if (cbEnabled)
+                buttons[i].gameObject.GetComponentInChildren<TextMesh>().text = "G";
+        }
     }
 
     string ConvertColor(string c)
@@ -725,9 +746,17 @@ public class PerspectiveStackingScript : MonoBehaviour {
                 input[i][j] = 0;
                 answer[i][j] = 0;
                 if (grid[i][j])
+                {
                     gridRends[i * 5 + j].material = gridMats[2];
+                    if (cbEnabled)
+                        buttons[i * 5 + j].gameObject.GetComponentInChildren<TextMesh>().text = "G";
+                }
                 else
+                {
                     gridRends[i * 5 + j].material = gridMats[1];
+                    if (cbEnabled)
+                        buttons[i * 5 + j].gameObject.GetComponentInChildren<TextMesh>().text = "R";
+                }
             }
         }
         yield return new WaitForSeconds(4f);
@@ -745,11 +774,26 @@ public class PerspectiveStackingScript : MonoBehaviour {
 
     //twitch plays
     #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"!{0} <R/G/B/C/M/Y/X> [Presses the specified button] | !{0} <A-E><1-5> [Presses the specified square with letter as column and number as row] | !{0} submit [Presses the SUB button] | The first two commands can be chained with spaces";
+    private readonly string TwitchHelpMessage = @"!{0} <R/G/B/C/M/Y/X> [Presses the specified button] | !{0} <A-E><1-5> [Presses the specified square with letter as column and number as row] | !{0} submit [Presses the SUB button] | !{0} colorblind [Toggles colorblind mode] | The first two commands can be chained with spaces";
     #pragma warning restore 414
     IEnumerator ProcessTwitchCommand(string command)
     {
-        if (Regex.IsMatch(command, @"^\s*submit\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        if (Regex.IsMatch(command, @"^\s*colorblind\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            cbEnabled = !cbEnabled;
+            for (int i = 0; i < gridRends.Length; i++)
+            {
+                if (!gridRends[i].material.name.Contains("grey"))
+                {
+                    if (cbEnabled)
+                        buttons[i].gameObject.GetComponentInChildren<TextMesh>().text = gridRends[i].material.name[0].ToString().ToUpper();
+                    else
+                        buttons[i].gameObject.GetComponentInChildren<TextMesh>().text = "";
+                }
+            }
+        }
+        else if (Regex.IsMatch(command, @"^\s*submit\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
         {
             if (mode == 0)
             {
